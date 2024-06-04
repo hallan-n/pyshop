@@ -1,5 +1,5 @@
 from infra.connection import Connection
-from sqlalchemy import select, insert, update, delete
+from sqlalchemy import select, insert, update, delete, text
 
 
 class Repositories:
@@ -50,3 +50,11 @@ class Repositories:
                 return True
             except:
                 return False
+
+    async def execute_sql(self, query):
+        async with self.conn as conn:
+            try:
+                result = await conn.execute(text(query))
+                return result.fetchall()
+            except:
+                return None
