@@ -1,13 +1,11 @@
-from infra.repositories import Repositories
-from infra.schemas import user_table
+from app.domain.usecases.user_usecase import UserUseCase
+from app.domain.models import User
+from fastapi import FastAPI
 
-repo = Repositories()
-async def rodar():
-    data = await repo.execute_sql("SELECT * FROM user;")
-    print(data)
+use = UserUseCase()
 
+app = FastAPI()
 
-import asyncio
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(rodar())
+@app.post('/')
+async def main(user: User):
+    await use.create_user(user)

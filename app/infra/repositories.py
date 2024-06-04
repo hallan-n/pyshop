@@ -1,4 +1,4 @@
-from infra.connection import Connection
+from app.infra.connection import Connection
 from sqlalchemy import select, insert, update, delete, text
 
 
@@ -29,18 +29,18 @@ class Repositories:
             try:
                 stmt = select(schema).where(schema.c.id == id)
                 result = await conn.execute(stmt)
-                return result.fetchone()
+                return result.mappings().fetchone()
             except:
-                return None
+                return False
 
     async def read_all(self, schema):
         async with self.conn as conn:
             try:
                 stmt = select(schema)
                 result = await conn.execute(stmt)
-                return result.fetchall()
+                return result.mappings().fetchall()
             except:
-                return None
+                return False
 
     async def delete(self, schema, id):
         async with self.conn as conn:
@@ -56,8 +56,8 @@ class Repositories:
             try:
                 result = await conn.execute(text(query))
                 try:
-                    return result.fetchall()
+                    return result.mappings().fetchall()
                 except:
                     return True
             except:
-                return None
+                return False
