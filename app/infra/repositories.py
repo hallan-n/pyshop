@@ -18,7 +18,7 @@ class Repositories:
     async def update(self, schema, data):
         async with self.conn as conn:
             try:
-                stmt = update(schema).where(schema.c.id == data.id).values(**data)
+                stmt = update(schema).where(schema.c.id == data["id"]).values(**data)
                 await conn.execute(stmt)
                 return True
             except:
@@ -29,7 +29,7 @@ class Repositories:
             try:
                 stmt = select(schema).where(schema.c.id == id)
                 result = await conn.execute(stmt)
-                return result
+                return result.fetchone()
             except:
                 return None
 
@@ -55,6 +55,9 @@ class Repositories:
         async with self.conn as conn:
             try:
                 result = await conn.execute(text(query))
-                return result.fetchall()
+                try:
+                    return result.fetchall()
+                except:
+                    return True
             except:
                 return None

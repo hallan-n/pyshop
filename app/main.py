@@ -1,11 +1,10 @@
-from infra.connection import Connection
+from infra.repositories import Repositories
+from infra.schemas import user_table
 
-conn = Connection()
-
-
+repo = Repositories()
 async def rodar():
-    async with conn as cn:
-        ...
+    data = await repo.execute_sql("SELECT * FROM user;")
+    print(data)
 
 
 import asyncio
