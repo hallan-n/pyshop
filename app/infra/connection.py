@@ -1,7 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-
-from app.infra.schemas import metadata
+from infra.schemas import metadata
 
 
 class Connection:

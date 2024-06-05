@@ -1,4 +1,4 @@
-from app.infra.connection import Connection
+from infra.connection import Connection
 from sqlalchemy import select, insert, update, delete, text
 
 

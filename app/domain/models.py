@@ -1,4 +1,6 @@
-from pydantic import BaseModel, field_validator
+from fastapi import HTTPException, status
+from pydantic import BaseModel, Field, field_validator
+import re
 
 
 class Product(BaseModel):
@@ -21,3 +23,19 @@ class User(BaseModel):
     email: str
     password: str
     is_seller: bool = False
+
+    @field_validator('name','email','password')
+    def lenght_validate(cls, value, field: Field):
+        if not (4 <= len(value) <= 254):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f'O campo {field.field_name.capitalize()} deve ter entre 4 e 254 caracteres.')        
+        return value
+
+    @field_validator('email')
+    def email_validate(cls, value):
+        if not re.match('.+@.+\\.[a-zA-Z]{2}', value.lower()):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f'O campo Email não está no padrão aceito.')
+        return value.lower()
