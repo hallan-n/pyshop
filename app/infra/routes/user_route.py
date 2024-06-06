@@ -1,4 +1,4 @@
-from domain.models import User
+from domain.models import User, UserPassword
 from domain.usecases.user_usecase import UserUseCase
 from fastapi import APIRouter
 
@@ -14,9 +14,15 @@ async def sign_up(user: User):
 
 
 @route.put("/")
-async def update_data(user: User):
+async def update_data(user: UserPassword):
     """Atualiza os dados de um usuário existente."""
     return await use.update_user(user)
+
+
+@route.put("/pass")
+async def update_password(user: UserPassword):
+    """Atualiza a senha de um usuário existente."""
+    return await use.update_password(user)
 
 
 @route.get("/")
