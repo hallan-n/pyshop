@@ -4,8 +4,6 @@ from sqlalchemy.orm import sessionmaker
 
 
 class Connection:
-    _tables_created = False
-
     def __init__(self) -> None:
         self.url = "mysql+aiomysql://root:123456@localhost:3306/pyshop"
         self.engine = create_async_engine(
@@ -18,12 +16,9 @@ class Connection:
     async def _create_tables(self):
         async with self.engine.begin() as conn:
             await conn.run_sync(metadata.create_all)
-        self._tables_created = True
 
     async def __aenter__(self):
-        if not self._tables_created:
-            print("criou")
-            await self._create_tables()
+        await self._create_tables()
         self.session = self.session_maker()
         return self.session
 
