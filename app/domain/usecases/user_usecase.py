@@ -5,11 +5,13 @@ from fastapi import Response, status
 from fastapi.exceptions import HTTPException
 from infra.repositories import Repositories
 from infra.schemas import user_table
+from infra.security import Security
 
 
 class UserUseCase:
     def __init__(self):
         self.repo = Repositories()
+        self.security = Security()
 
     async def create_user(self, user: User):
         stmt = await self.repo.execute_sql(
@@ -19,6 +21,7 @@ class UserUseCase:
             raise HTTPException(
                 detail="E-mail já cadastrado.", status_code=status.HTTP_409_CONFLICT
             )
+        user.password = self.security.hashed(user.password)
         created = await self.repo.create(user_table, user.model_dump())
         response = json.dumps({"sucess": created})
         return Response(content=response, status_code=status.HTTP_201_CREATED)
@@ -36,7 +39,7 @@ class UserUseCase:
             raise HTTPException(
                 detail="O Email já está em uso.", status_code=status.HTTP_409_CONFLICT
             )
-
+        user.password = self.security.hashed(user.password)
         updated = await self.repo.update(user_table, user.model_dump())
         response = json.dumps({"sucess": updated})
         return Response(content=response, status_code=status.HTTP_200_OK)
