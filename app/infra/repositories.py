@@ -1,5 +1,5 @@
 from infra.connection import Connection
-from sqlalchemy import select, insert, update, delete, text
+from sqlalchemy import delete, insert, select, text, update
 
 
 class Repositories:

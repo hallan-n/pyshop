@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field, field_validator
 import re
+
+from pydantic import BaseModel, Field, field_validator
 
 
 class Product(BaseModel):
@@ -23,14 +24,18 @@ class User(BaseModel):
     password: str
     is_seller: bool = False
 
-    @field_validator('name','email','password')
+    @field_validator("name", "email", "password", mode="after")
     def lenght_validate(cls, value, field: Field):
         if not (4 <= len(value) <= 254):
-            raise ValueError(f'O campo {field.field_name.capitalize()} deve ter entre 4 e 254 caracteres.')        
+            raise ValueError(
+                f"O campo {field.field_name.capitalize()} deve ter entre 4 e 254 caracteres."
+            )
         return value
 
-    @field_validator('email')
+    @field_validator(
+        "email",
+    )
     def email_validate(cls, value):
-        if not re.match('.+@.+\\.[a-zA-Z]{2}', value.lower()):            
-            raise ValueError(f'O campo Email não está no padrão aceito.')
+        if not re.match(".+@.+\\.[a-zA-Z]{2}", value.lower()):
+            raise ValueError(f"O campo Email não está no padrão aceito.")
         return value.lower()
