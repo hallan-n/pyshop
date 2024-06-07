@@ -78,10 +78,28 @@ class UserUseCase:
         response = json.dumps({"sucess": updated})
         return Response(content=response, status_code=status.HTTP_200_OK)
 
-    async def get_user(self, id: int):
+    async def get_user_by_id(self, id: int):
         stmt = await self.repo.read(user_table, id)
         if stmt == None:
             raise HTTPException(
                 detail="Usuário não encontrado.", status_code=status.HTTP_404_NOT_FOUND
             )
         return User(**stmt)
+
+    async def get_user_by_login(self, user: User):
+        stmt = await self.repo.execute_sql(
+            f'SELECT 1 FROM user WHERE email="{user.email}"'
+        )
+        if stmt == []:
+            raise HTTPException(
+                detail="Usuário não encontrado.", status_code=status.HTTP_404_NOT_FOUND
+            )
+        stmt = await self.repo.execute_sql(
+            f'SELECT * FROM user WHERE email="{user.email}"'
+        )
+        if not self.security.check_hash(stmt[0]["password"], user.password):
+            raise HTTPException(
+                detail="Senha incorreta.",
+                status_code=status.HTTP_401_UNAUTHORIZED,
+            )
+        return User(**stmt[0])
