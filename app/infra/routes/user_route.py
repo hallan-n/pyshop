@@ -21,7 +21,9 @@ async def update_data(user: UserPassword, token: dict = Depends(security.decode_
 
 
 @route.put("/pass")
-async def update_password(user: UserPassword, token: dict = Depends(security.decode_token)):
+async def update_password(
+    user: UserPassword, token: dict = Depends(security.decode_token)
+):
     """Atualiza a senha de um usuário existente."""
     return await use.update_password(user)
 
