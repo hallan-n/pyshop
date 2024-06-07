@@ -31,6 +31,10 @@ class Security:
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, self._SECRET_KEY, algorithm=self._ALGORITHM)
         return encoded_jwt
+    
+    def revoke_access_token(self, data: dict):
+        # TODO
+        ...
 
     def decode_token(self, token: str = Header(...)):
         try:
