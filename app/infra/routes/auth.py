@@ -12,6 +12,6 @@ route = APIRouter(tags=["Auth"], prefix="/auth")
 @route.post("/")
 async def get_auth(user: User):
     user_auth = await use.get_user_by_login(user)
-    data = {"sub": user_auth.email}
+    data = {"sub": user_auth.email, 'id': user_auth.id}
     access_token = security.create_access_token(data=data)
     return {"access_token": access_token, "token_type": "bearer"}
