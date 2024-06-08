@@ -10,18 +10,15 @@ class Cache:
             host=getenv("REDIS_HOST"),
             port=int(getenv("REDIS_PORT")),
             db=int(getenv("REDIS_DB")),
+            decode_responses=True,
         )
         self.expire = int(getenv("REDIS_EXPIRE_MINUTES")) * 60
 
     def set(self, key, data):
-        if self.redis.exists(key):
-            self.redis.delete(key)
-        self.redis.setex(key, self.expire, json.dumps(data))
+        self.redis.setex(f"{key}:{data}", self.expire, json.dumps(data))
 
-    def get(self, key):
-        if self.redis.exists(key):
-            return json.loads(self.redis.get(key))
-        return None
+    def has(self, key, value):
+        return bool(self.redis.exists(f"{key}:{value}"))
 
     def clear(self):
         self.redis.flushdb()
