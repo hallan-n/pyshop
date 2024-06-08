@@ -2,14 +2,12 @@ from datetime import datetime, timedelta
 from os import getenv
 
 import bcrypt
-from dotenv import load_dotenv
 from fastapi import Header, HTTPException, status
 from jose import JWTError, jwt
 
 
 class Security:
     def __init__(self) -> None:
-        load_dotenv()
         self._SECRET_KEY = getenv("SECRET_KEY")
         self._ALGORITHM = getenv("ALGORITHM")
         self._EXPIRE = int(getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))

@@ -16,6 +16,7 @@ async def get_auth(user: User):
     access_token = security.create_access_token(data=data)
     return {"access_token": access_token, "token_type": "bearer"}
 
+
 @route.post("/logout")
 async def revoke_auth(token: dict = Depends(security.decode_token)):
     # TODO

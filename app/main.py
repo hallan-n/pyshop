@@ -1,8 +1,10 @@
 import uvicorn
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from infra.routes.auth import route as auth
 from infra.routes.user_route import route as user
 
+load_dotenv()
 app = FastAPI()
 app.include_router(user)
 app.include_router(auth)

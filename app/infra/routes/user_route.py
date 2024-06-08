@@ -17,7 +17,7 @@ async def sign_up(user: User):
 @route.put("/")
 async def update_data(user: UserPassword, token: dict = Depends(security.decode_token)):
     """Atualiza os dados de um usuário existente."""
-    if token['id'] != user.id:
+    if token["id"] != user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Acesso negado.",
@@ -31,7 +31,7 @@ async def update_password(
     user: UserPassword, token: dict = Depends(security.decode_token)
 ):
     """Atualiza a senha de um usuário existente."""
-    if token['id'] != user.id:
+    if token["id"] != user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Acesso negado.",
@@ -43,7 +43,7 @@ async def update_password(
 @route.get("/")
 async def read_data(id: int, token: dict = Depends(security.decode_token)):
     """Retorna os dados de um usuário."""
-    if token['id'] != id:
+    if token["id"] != id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Acesso negado.",
