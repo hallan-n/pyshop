@@ -103,3 +103,16 @@ class UserUseCase:
                 status_code=status.HTTP_401_UNAUTHORIZED,
             )
         return User(**stmt[0])
+
+    async def get_user_by_email(self, email: str):
+        stmt = await self.repo.execute_sql(
+            f'SELECT 1 FROM user WHERE email="{email}"'
+        )
+        if stmt == []:
+            raise HTTPException(
+                detail="Usuário não encontrado.", status_code=status.HTTP_404_NOT_FOUND
+            )
+        stmt = await self.repo.execute_sql(
+            f'SELECT * FROM user WHERE email="{email}"'
+        )
+        return User(**stmt[0])

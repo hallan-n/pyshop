@@ -9,6 +9,10 @@ class Product(BaseModel):
     price: float
     user_id: int
 
+class ProductReadDelete(BaseModel):
+    product_id: int
+    user_id: int
+
 
 class Category(BaseModel):
     id: int = None

@@ -1,10 +1,10 @@
 import json
 
-from domain.models import Product
+from domain.models import Product, ProductReadDelete, User
 from fastapi import Response, status
 from fastapi.exceptions import HTTPException
 from infra.repositories import Repositories
-from infra.schemas import product_table, user_table
+from infra.schemas import product_table
 from infra.security import Security
 
 
@@ -26,9 +26,9 @@ class ProductUseCase:
         response = json.dumps({"sucess": created})
         return Response(content=response, status_code=status.HTTP_201_CREATED)
 
-    async def update_user(self, product: Product):
+    async def update_product(self, product: Product):
         stmt = await self.repo.execute_sql(
-            f'SELECT 1 FROM product WHERE id="{product.id}"'
+            f'SELECT 1 FROM product WHERE id={product.id}'
         )
         if stmt == []:
             raise HTTPException(
@@ -43,31 +43,30 @@ class ProductUseCase:
         response = json.dumps({"sucess": updated})
         return Response(content=response, status_code=status.HTTP_200_OK)
 
-    async def read_product(self, id: int):
-        product = await self.repo.read(product_table, id)
-        if product == [] or not product:
+    async def read_product(self, product: ProductReadDelete):
+        product_existes = await self.repo.execute_sql(f'SELECT 1 FROM product WHERE id={product.product_id} AND user_id={product.user_id}')
+        if product_existes == []:
             raise HTTPException(
                 detail="Produto não encontrado.", status_code=status.HTTP_404_NOT_FOUND
             )
+        product_existes = await self.repo.execute_sql(f'SELECT * FROM product WHERE id={product.product_id} AND user_id={product.user_id}')
         return Product(**product)
 
-    async def read_all_products(self):
-        products = await self.repo.read_all(product_table)
+    async def read_all_products(self, user_id: int):
+        products = await self.repo.execute_sql(f'SELECT * FROM product WHERE user_id={user_id}')
         if products == []:
             raise HTTPException(
                 detail="Não existe produtos.", status_code=status.HTTP_404_NOT_FOUND
             )
         return products
 
-    async def delete_products(self, id: int):
-        product_existes = await self.repo.execute_sql(
-            f"SELECT 1 FROM product WHERE id={id}"
-        )
+    async def delete_product(self, product: ProductReadDelete):
+        product_existes = await self.repo.execute_sql(f'SELECT 1 FROM product WHERE id={product.product_id} AND user_id={product.user_id}')
         if product_existes == []:
             raise HTTPException(
                 detail="Produto não encontrado.", status_code=status.HTTP_404_NOT_FOUND
             )
-
-        deleted = await self.repo.delete(product_table, id)
+        
+        deleted = await self.repo.delete(product_table, product.product_id)
         response = json.dumps({"sucess": deleted})
         return Response(content=response, status_code=status.HTTP_200_OK)
