@@ -1,6 +1,6 @@
 from domain.models import User
 from domain.usecases.user_usecase import UserUseCase
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Header
 from infra.security import Security
 
 use = UserUseCase()
@@ -18,6 +18,5 @@ async def get_auth(user: User):
 
 
 @route.post("/logout")
-async def revoke_auth(token: dict = Depends(security.decode_token)):
-    # TODO
-    ...
+async def revoke_auth(token: str = Header(...)):
+    security.revoke_access_token(token)

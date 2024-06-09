@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from os import getenv
+from infra.cache import Cache
 
 import bcrypt
 from fastapi import Header, HTTPException, status
@@ -11,6 +12,7 @@ class Security:
         self._SECRET_KEY = getenv("SECRET_KEY")
         self._ALGORITHM = getenv("ALGORITHM")
         self._EXPIRE = int(getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
+        self.cache = Cache()
 
     def hashed(self, password: str):
         salt = bcrypt.gensalt()
@@ -30,12 +32,17 @@ class Security:
         encoded_jwt = jwt.encode(to_encode, self._SECRET_KEY, algorithm=self._ALGORITHM)
         return encoded_jwt
     
-    def revoke_access_token(self, data: dict):
-        # TODO
-        ...
+    def revoke_access_token(self, token: str):
+        self.cache.set('blacklist', token)
 
     def decode_token(self, token: str = Header(...)):
         try:
+            if self.cache.has('blacklist', token):
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Token incorreto ou expirado.",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
             payload = jwt.decode(token, self._SECRET_KEY, algorithms=[self._ALGORITHM])
             return payload
         except JWTError:
