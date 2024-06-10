@@ -43,13 +43,13 @@ class ProductUseCase:
         response = json.dumps({"sucess": updated})
         return Response(content=response, status_code=status.HTTP_200_OK)
 
-    async def read_product(self, product: ProductReadDelete):
-        product_existes = await self.repo.execute_sql(f'SELECT 1 FROM product WHERE id={product.product_id} AND user_id={product.user_id}')
+    async def read_product(self, product_id: int, owner:int):
+        product_existes = await self.repo.execute_sql(f'SELECT 1 FROM product WHERE id={product_id} AND user_id={owner}')
         if product_existes == []:
             raise HTTPException(
                 detail="Produto não encontrado.", status_code=status.HTTP_404_NOT_FOUND
             )
-        product_existes = await self.repo.execute_sql(f'SELECT * FROM product WHERE id={product.product_id} AND user_id={product.user_id}')
+        product = await self.repo.execute_sql(f'SELECT * FROM product WHERE id={product_id} AND user_id={owner}')
         return Product(**product)
 
     async def read_all_products(self, user_id: int):
@@ -60,13 +60,16 @@ class ProductUseCase:
             )
         return products
 
-    async def delete_product(self, product: ProductReadDelete):
-        product_existes = await self.repo.execute_sql(f'SELECT 1 FROM product WHERE id={product.product_id} AND user_id={product.user_id}')
+    async def delete_product(self, product_id: int, owner:int):
+        product_existes = await self.repo.execute_sql(f'SELECT 1 FROM product WHERE id={product_id} AND user_id={owner}')
         if product_existes == []:
             raise HTTPException(
                 detail="Produto não encontrado.", status_code=status.HTTP_404_NOT_FOUND
             )
-        
-        deleted = await self.repo.delete(product_table, product.product_id)
+        deleted = await self.repo.delete(product_table, product_id)
         response = json.dumps({"sucess": deleted})
         return Response(content=response, status_code=status.HTTP_200_OK)
+
+    async def is_owner(self, product_id: int,  token: dict):
+        product_existes = await self.repo.execute_sql(f'SELECT 1 FROM product WHERE id={product_id} AND user_id={token['id']}')
+        return bool(product_existes)
