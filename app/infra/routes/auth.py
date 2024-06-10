@@ -1,6 +1,6 @@
-from domain.models import User
+from app.domain.models.user import UserLogin
 from domain.usecases.user_usecase import UserUseCase
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Header
 from infra.security import Security
 
 use = UserUseCase()
@@ -10,7 +10,7 @@ route = APIRouter(tags=["Auth"], prefix="/auth")
 
 
 @route.post("/login")
-async def get_auth(user: User):
+async def get_auth(user: UserLogin):
     user_auth = await use.get_user_by_login(user)
     data = {"sub": user_auth.email, "id": user_auth.id}
     access_token = security.create_access_token(data=data)

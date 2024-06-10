@@ -1,6 +1,6 @@
 import json
 
-from domain.models import Product, ProductReadDelete, User
+from app.domain.models.models import Product, ProductReadDelete, User
 from fastapi import Response, status
 from fastapi.exceptions import HTTPException
 from infra.repositories import Repositories

@@ -1,6 +1,6 @@
 import json
 
-from domain.models import User, UserPassword
+from app.domain.models.user import User, UserCreate, UserPassword, UserUpdate
 from fastapi import Response, status
 from fastapi.exceptions import HTTPException
 from infra.repositories import Repositories
@@ -13,7 +13,7 @@ class UserUseCase:
         self.repo = Repositories()
         self.security = Security()
 
-    async def create_user(self, user: User):
+    async def create_user(self, user: UserCreate):
         stmt = await self.repo.execute_sql(
             f'SELECT 1 FROM user WHERE email="{user.email}"'
         )
@@ -26,7 +26,7 @@ class UserUseCase:
         response = json.dumps({"sucess": created})
         return Response(content=response, status_code=status.HTTP_201_CREATED)
 
-    async def update_user(self, user: User):
+    async def update_user(self, user: UserUpdate):
         stmt = await self.repo.execute_sql(f'SELECT 1 FROM user WHERE id="{user.id}"')
         if stmt == []:
             raise HTTPException(

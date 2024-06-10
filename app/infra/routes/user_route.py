@@ -1,4 +1,4 @@
-from domain.models import User, UserPassword
+from app.domain.models.user import UserCreate, UserUpdate, UserPassword
 from domain.usecases.user_usecase import UserUseCase
 from fastapi import APIRouter, Depends, HTTPException, status
 from infra.security import Security
@@ -9,13 +9,13 @@ route = APIRouter(tags=["User"], prefix="/user")
 
 
 @route.post("/")
-async def sign_up(user: User):
+async def sign_up(user: UserCreate):
     """Cria um usuário."""
     return await use.create_user(user)
 
 
 @route.put("/")
-async def update_data(user: UserPassword, token: dict = Depends(security.decode_token)):
+async def update_data(user: UserUpdate, token: dict = Depends(security.decode_token)):
     """Atualiza os dados de um usuário existente."""
     if token["id"] != user.id:
         raise HTTPException(
