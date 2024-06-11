@@ -1,6 +1,6 @@
 import json
 
-from app.domain.models.models import Product, ProductReadDelete, User
+from app.domain.models.product import Product
 from fastapi import Response, status
 from fastapi.exceptions import HTTPException
 from infra.repositories import Repositories
@@ -14,14 +14,6 @@ class ProductUseCase:
         self.security = Security()
 
     async def create_product(self, product: Product):
-        is_seller = await self.repo.execute_sql(
-            f"SELECT 1 FROM user WHERE id={product.user_id} AND is_seller=1"
-        )
-        if is_seller == []:
-            raise HTTPException(
-                detail="O usuário não é um vendedor",
-                status_code=status.HTTP_409_CONFLICT,
-            )
         created = await self.repo.create(product_table, product.model_dump())
         response = json.dumps({"sucess": created})
         return Response(content=response, status_code=status.HTTP_201_CREATED)
@@ -70,6 +62,6 @@ class ProductUseCase:
         response = json.dumps({"sucess": deleted})
         return Response(content=response, status_code=status.HTTP_200_OK)
 
-    async def is_owner(self, product_id: int,  token: dict):
-        product_existes = await self.repo.execute_sql(f'SELECT 1 FROM product WHERE id={product_id} AND user_id={token['id']}')
-        return bool(product_existes)
+    async def is_seller(self, token: dict):
+        seller = await self.repo.execute_sql(f'SELECT 1 FROM product WHERE id={token['id']} AND is_seller=1')
+        return bool(seller)

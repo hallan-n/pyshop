@@ -1,6 +1,6 @@
 import json
 
-from app.domain.models.user import User, UserCreate, UserPassword, UserUpdate
+from app.domain.models.user import User, UserCreate, UserLogin, UserPassword, UserUpdate
 from fastapi import Response, status
 from fastapi.exceptions import HTTPException
 from infra.repositories import Repositories
@@ -86,7 +86,7 @@ class UserUseCase:
             )
         return User(**stmt)
 
-    async def get_user_by_login(self, user: User):
+    async def get_user_by_login(self, user: UserLogin):
         stmt = await self.repo.execute_sql(
             f'SELECT 1 FROM user WHERE email="{user.email}"'
         )

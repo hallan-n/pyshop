@@ -1,7 +1,8 @@
-from app.domain.models.user import UserCreate, UserUpdate, UserPassword
 from domain.usecases.user_usecase import UserUseCase
 from fastapi import APIRouter, Depends, HTTPException, status
 from infra.security import Security
+
+from app.domain.models.user import UserCreate, UserPassword, UserUpdate
 
 use = UserUseCase()
 security = Security()

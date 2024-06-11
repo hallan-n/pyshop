@@ -57,6 +57,7 @@ class UserUpdate(BaseModel):
 
 
 class UserPassword(BaseModel):
+    id: int
     new_password: str
     old_password: str
 
@@ -72,7 +73,7 @@ class UserPassword(BaseModel):
 class User(UserUpdate):
     password: str
 
-    @field_validator("opassword")
+    @field_validator("password")
     def lenght_validate(cls, value, field: Field):
         if not (4 <= len(value) <= 254):
             raise ValueError(

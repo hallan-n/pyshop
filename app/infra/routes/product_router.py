@@ -1,4 +1,4 @@
-from domain.models import Product, ProductReadDelete
+from domain.models.product import Product, ProductCreate, ProductUpdate
 from domain.usecases.product_usecase import ProductUseCase
 from fastapi import APIRouter, Depends, HTTPException, status
 from infra.security import Security
@@ -9,49 +9,55 @@ route = APIRouter(tags=["Product"], prefix="/product")
 
 
 @route.post("/")
-async def create_product(product: Product, token: dict = Depends(security.decode_token)):
-    
-    if not use.is_owner(product.id, token):
+async def create_product(
+    product: ProductCreate, token: dict = Depends(security.decode_token)
+):
+    if not use.is_seller(token):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Acesso negado.",
+            detail="Você não é um vendedor.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return await use.create_product(product)
+    return await use.create_product(
+        Product(**product.model_dump(), user_id=token["id"])
+    )
+
 
 @route.put("/")
-async def update_product(product: Product, token: dict = Depends(security.decode_token)):
-    if not use.is_owner(product.id, token):
+async def update_product(
+    product: ProductUpdate, token: dict = Depends(security.decode_token)
+):
+    if not use.is_seller(token):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Acesso negado.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return await use.update_product(product)
+    return await use.update_product(Product(**product.model_dump(), user_id=token["id"]))
+
 
 @route.get("/")
-async def read_all_products(token: dict = Depends(security.decode_token)
-):
-    return await use.read_all_products(token['id'])
+async def read_all_products(token: dict = Depends(security.decode_token)):
+    return await use.read_all_products(token["id"])
+
 
 @route.get("/{id}")
-async def read_product(id: int, token: dict = Depends(security.decode_token)
-):
-    if not use.is_owner(id, token):
+async def read_product(id: int, token: dict = Depends(security.decode_token)):
+    if not use.is_seller(token):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Acesso negado.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return await use.read_product(id, token['id'])
+    return await use.read_product(id, token["id"])
 
 
 @route.delete("/{id}")
 async def delete_products(id: int, token: dict = Depends(security.decode_token)):
-    if not use.is_owner(id, token):
+    if not use.is_seller(token):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Acesso negado.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return await use.delete_product(id, token['id'])
+    return await use.delete_product(id, token["id"])

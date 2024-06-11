@@ -4,7 +4,17 @@ from sqlalchemy.orm import sessionmaker
 
 
 class Connection:
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(Connection, cls).__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
+
     def __init__(self) -> None:
+        if self._initialized:
+            return
         self.url = "mysql+aiomysql://root:123456@localhost:3306/pyshop"
         self.engine = create_async_engine(
             self.url, echo=True, pool_size=10, max_overflow=20
@@ -12,6 +22,7 @@ class Connection:
         self.session_maker = sessionmaker(
             bind=self.engine, class_=AsyncSession, expire_on_commit=False
         )
+        self._initialized = True
 
     async def _create_tables(self):
         async with self.engine.begin() as conn:

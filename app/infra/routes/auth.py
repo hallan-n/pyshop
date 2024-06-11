@@ -1,7 +1,8 @@
-from app.domain.models.user import UserLogin
 from domain.usecases.user_usecase import UserUseCase
 from fastapi import APIRouter, Header
 from infra.security import Security
+
+from app.domain.models.user import UserLogin
 
 use = UserUseCase()
 security = Security()

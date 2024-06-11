@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
 from os import getenv
-from infra.cache import Cache
 
 import bcrypt
 from fastapi import Header, HTTPException, status
+from infra.cache import Cache
 from jose import JWTError, jwt
 
 
@@ -31,13 +31,13 @@ class Security:
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, self._SECRET_KEY, algorithm=self._ALGORITHM)
         return encoded_jwt
-    
+
     def revoke_access_token(self, token: str):
-        self.cache.set('blacklist', token)
+        self.cache.set("blacklist", token)
 
     def decode_token(self, token: str = Header(...)):
         try:
-            if self.cache.has('blacklist', token):
+            if self.cache.has("blacklist", token):
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Token incorreto ou expirado.",
