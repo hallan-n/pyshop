@@ -1,6 +1,6 @@
 import json
 
-from app.domain.models.product import Product
+from domain.models.product import Product
 from fastapi import Response, status
 from fastapi.exceptions import HTTPException
 from infra.repositories import Repositories
@@ -42,7 +42,7 @@ class ProductUseCase:
                 detail="Produto não encontrado.", status_code=status.HTTP_404_NOT_FOUND
             )
         product = await self.repo.execute_sql(f'SELECT * FROM product WHERE id={product_id} AND user_id={owner}')
-        return Product(**product)
+        return Product(**product[0])
 
     async def read_all_products(self, user_id: int):
         products = await self.repo.execute_sql(f'SELECT * FROM product WHERE user_id={user_id}')

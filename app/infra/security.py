@@ -12,7 +12,6 @@ class Security:
         self._SECRET_KEY = getenv("SECRET_KEY")
         self._ALGORITHM = getenv("ALGORITHM")
         self._EXPIRE = int(getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
-        self.cache = Cache()
 
     def hashed(self, password: str):
         salt = bcrypt.gensalt()
@@ -33,11 +32,11 @@ class Security:
         return encoded_jwt
 
     def revoke_access_token(self, token: str):
-        self.cache.set("blacklist", token)
+        Cache.set("blacklist", token)
 
     def decode_token(self, token: str = Header(...)):
         try:
-            if self.cache.has("blacklist", token):
+            if Cache.has("blacklist", token):
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Token incorreto ou expirado.",

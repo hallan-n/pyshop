@@ -36,7 +36,6 @@ class UserCreate(UserLogin):
 
 
 class UserUpdate(BaseModel):
-    id: int = None
     name: str
     email: str
     is_seller: bool
@@ -57,7 +56,6 @@ class UserUpdate(BaseModel):
 
 
 class UserPassword(BaseModel):
-    id: int
     new_password: str
     old_password: str
 
@@ -71,7 +69,8 @@ class UserPassword(BaseModel):
 
 
 class User(UserUpdate):
-    password: str
+    id: int = None
+    password: str = None
 
     @field_validator("password")
     def lenght_validate(cls, value, field: Field):

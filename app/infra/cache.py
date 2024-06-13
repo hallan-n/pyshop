@@ -1,7 +1,7 @@
 import json
 from os import getenv
 
-import aioredis
+import redis
 
 
 class Cache:
@@ -9,45 +9,46 @@ class Cache:
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(Cache, cls).__new__(cls)
-            cls._instance._initialized = False
+            cls._instance = super().__new__(cls)
+            cls._instance.redis = redis.Redis(
+                host=getenv("REDIS_HOST"),
+                port=int(getenv("REDIS_PORT")),
+                db=int(getenv("REDIS_DB")),
+                decode_responses=True,
+            )
+            cls._instance.expire = int(getenv("REDIS_EXPIRE_MINUTES")) * 60
         return cls._instance
 
-    def __init__(self) -> None:
-        if self._initialized:
-            return
-        self.redis_host = getenv("REDIS_HOST", "localhost")
-        self.redis_port = int(getenv("REDIS_PORT", 6379))
-        self.redis_db = int(getenv("REDIS_DB", 0))
-        self.expire = int(getenv("REDIS_EXPIRE_MINUTES", 5)) * 60
-        self._initialized = True
+    @classmethod
+    def set(cls, key, data):
+        try:
+            cls.instance().redis.setex(
+                f"{key}:{data}", cls.instance().expire, json.dumps(data)
+            )
+        except redis.RedisError as e:
+            raise Exception(f"Erro ao definir chave no Redis: {e}")
 
-    async def initialize(self):
-        self.redis = await aioredis.create_redis_pool(
-            (self.redis_host, self.redis_port),
-            db=self.redis_db,
-            decode_responses=True,
-        )
 
-    async def set(self, key, data):
-        await self.redis.setex(f"{key}:{data}", self.expire, json.dumps(data))
+    @classmethod
+    def has(cls, key, value):
+        try:
+            return bool(cls.instance().redis.exists(f"{key}:{value}"))
+        except redis.RedisError as e:
+            raise Exception(f"Erro ao verificar existência de chave no Redis: {e}")
 
-    async def has(self, key, value):
-        return bool(await self.redis.exists(f"{key}:{value}"))
+    @classmethod
+    def clear(cls):
+        try:
+            cls.instance().redis.flushdb()
+        except redis.RedisError as e:
+            raise Exception(f"Erro ao limpar o banco de dados Redis: {e}")
 
-    async def clear(self):
-        await self.redis.flushdb()
+    @classmethod
+    def exists(cls, key):
+        return bool(cls.instance().redis.exists(key))
 
-    async def exists(self, key):
-        return bool(await self.redis.exists(key))
-
-    async def close(self):
-        self.redis.close()
-        await self.redis.wait_closed()
-
-    async def __aenter__(self):
-        await self.initialize()
-        return self
-
-    async def __aexit__(self, exc_type, exc_value, traceback):
-        await self.close()
+    @classmethod
+    def instance(cls):
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance

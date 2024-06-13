@@ -1,6 +1,6 @@
 import json
 
-from app.domain.models.user import User, UserCreate, UserLogin, UserPassword, UserUpdate
+from domain.models.user import User, UserCreate, UserLogin, UserPassword, UserUpdate
 from fastapi import Response, status
 from fastapi.exceptions import HTTPException
 from infra.repositories import Repositories
@@ -15,7 +15,10 @@ class UserUseCase:
 
     async def create_user(self, user: UserCreate):
         stmt = await self.repo.execute_sql(
-            f'SELECT 1 FROM user WHERE email="{user.email}"'
+            f'''
+                SELECT 1 FROM user
+                WHERE email="{user.email}"
+            '''
         )
         if stmt != []:
             raise HTTPException(
@@ -26,21 +29,26 @@ class UserUseCase:
         response = json.dumps({"sucess": created})
         return Response(content=response, status_code=status.HTTP_201_CREATED)
 
-    async def update_user(self, user: UserUpdate):
-        stmt = await self.repo.execute_sql(f'SELECT 1 FROM user WHERE id="{user.id}"')
-        if stmt == []:
-            raise HTTPException(
-                detail="Usuário não encontrado.", status_code=status.HTTP_404_NOT_FOUND
-            )
+    async def update_user(self, user: UserUpdate, user_id: int):
+ 
         stmt = await self.repo.execute_sql(
-            f'SELECT 1 FROM user WHERE email="{user.email}"'
+            f'''
+                SELECT 1 FROM user
+                WHERE email="{user.email}"
+                AND id <> {user_id}
+            '''
         )
         if stmt != []:
             raise HTTPException(
                 detail="O Email já está em uso.", status_code=status.HTTP_409_CONFLICT
             )
         updated = await self.repo.execute_sql(
-            f'UPDATE user SET name="{user.name}", email="{user.email}" WHERE id={user.id}'
+            f'''
+                UPDATE user
+                SET name="{user.name}",
+                email="{user.email}"
+                WHERE id={user_id}
+            '''
         )
         if not updated:
             raise HTTPException(
@@ -51,14 +59,13 @@ class UserUseCase:
         response = json.dumps({"sucess": updated})
         return Response(content=response, status_code=status.HTTP_200_OK)
 
-    async def update_password(self, user: UserPassword):
-        stmt = await self.repo.execute_sql(f'SELECT 1 FROM user WHERE id="{user.id}"')
-        if stmt == []:
-            raise HTTPException(
-                detail="Usuário não encontrado.", status_code=status.HTTP_404_NOT_FOUND
-            )
+    async def update_password(self, user: UserPassword, user_id: int):
         current_pass = await self.repo.execute_sql(
-            f'SELECT password FROM user WHERE id="{user.id}"'
+            f'''
+                SELECT password
+                FROM user
+                WHERE id={user_id}
+            '''
         )
         if not self.security.check_hash(current_pass[0]["password"], user.old_password):
             raise HTTPException(
@@ -67,14 +74,18 @@ class UserUseCase:
             )
         user.new_password = self.security.hashed(user.new_password)
         updated = await self.repo.execute_sql(
-            f'UPDATE user SET password="{user.new_password}" WHERE id={user.id}'
+            f'''
+                UPDATE user
+                SET password="{user.new_password}"
+                WHERE id={user_id}
+            '''
         )
         if not updated:
             raise HTTPException(
                 detail="Erro ao atualizar os dados do usuário.",
                 status_code=status.HTTP_409_CONFLICT,
             )
-
+        
         response = json.dumps({"sucess": updated})
         return Response(content=response, status_code=status.HTTP_200_OK)
 
