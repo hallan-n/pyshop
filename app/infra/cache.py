@@ -28,7 +28,6 @@ class Cache:
         except redis.RedisError as e:
             raise Exception(f"Erro ao definir chave no Redis: {e}")
 
-
     @classmethod
     def has(cls, key, value):
         try:

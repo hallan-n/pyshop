@@ -22,7 +22,7 @@ class ProductUseCase:
     async def update_product(self, product: Product):
         await self._isseler(product.user_id)
         await self._product_exists(product.id, product.user_id)
-        
+
         updated = await self.repo.update(product_table, product.model_dump())
         if not updated:
             raise HTTPException(
@@ -32,27 +32,27 @@ class ProductUseCase:
         response = json.dumps({"sucess": updated})
         return Response(content=response, status_code=status.HTTP_200_OK)
 
-    async def read_product(self, product_id: int, owner:int):
-        await self._isseler(owner)        
+    async def read_product(self, product_id: int, owner: int):
+        await self._isseler(owner)
         await self._product_exists(product_id, owner)
 
         product = await self.repo.execute_sql(
-            f'''
+            f"""
                 SELECT * 
                 FROM product
                 WHERE id={product_id}
                 AND user_id={owner}
-            '''
+            """
         )
         return Product(**product[0])
 
     async def read_all_products(self, user_id: int):
         products = await self.repo.execute_sql(
-            f'''
+            f"""
                 SELECT * 
                 FROM product 
                 WHERE user_id={user_id}
-            '''
+            """
         )
         if products == []:
             raise HTTPException(
@@ -60,18 +60,17 @@ class ProductUseCase:
             )
         return products
 
-    async def delete_product(self, product_id: int, owner:int):
+    async def delete_product(self, product_id: int, owner: int):
         await self._isseler(owner)
         await self._product_exists(product_id, owner)
-        
-        
+
         product_exists = await self.repo.execute_sql(
-            f'''
+            f"""
                 SELECT 1
                 FROM product
                 WHERE id={product_id}
                 AND user_id={owner}
-            '''
+            """
         )
         if product_exists == []:
             raise HTTPException(
@@ -83,28 +82,28 @@ class ProductUseCase:
 
     async def _isseler(self, id: int):
         is_seller = await self.repo.execute_sql(
-            f'''
+            f"""
                 SELECT 1 FROM user
                 WHERE id={id}
                 AND is_seller=1
-            '''
+            """
         )
-        
+
         if not is_seller:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="É preciso ser vendedor para realizar esta ação.",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-    
+
     async def _product_exists(self, product_id: int, owner: int):
         stmt = await self.repo.execute_sql(
-            f'''
+            f"""
                 SELECT * 
                 FROM product
                 WHERE id={product_id}
                 AND user_id={owner}
-            '''
+            """
         )
         if stmt == []:
             raise HTTPException(

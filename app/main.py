@@ -2,8 +2,8 @@ import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from infra.routes.auth import route as auth
-from infra.routes.user_route import route as user
 from infra.routes.product_router import route as product
+from infra.routes.user_route import route as user
 
 load_dotenv()
 app = FastAPI()
