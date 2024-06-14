@@ -12,12 +12,7 @@ route = APIRouter(tags=["Product"], prefix="/product")
 async def create_product(
     product: ProductCreate, token: dict = Depends(security.decode_token)
 ):
-    if not use.is_seller(token):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Você não é um vendedor.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+
     return await use.create_product(
         Product(**product.model_dump(), user_id=token["id"])
     )
@@ -27,12 +22,6 @@ async def create_product(
 async def update_product(
     product: ProductUpdate, token: dict = Depends(security.decode_token)
 ):
-    if not use.is_seller(token):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Acesso negado.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
     return await use.update_product(Product(**product.model_dump(), user_id=token["id"]))
 
 
@@ -43,21 +32,9 @@ async def read_all_products(token: dict = Depends(security.decode_token)):
 
 @route.get("/{id}")
 async def read_product(id: int, token: dict = Depends(security.decode_token)):
-    if not use.is_seller(token):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Acesso negado.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
     return await use.read_product(id, token["id"])
 
 
 @route.delete("/{id}")
-async def delete_products(id: int, token: dict = Depends(security.decode_token)):
-    if not use.is_seller(token):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Acesso negado.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+async def delete_product(id: int, token: dict = Depends(security.decode_token)):
     return await use.delete_product(id, token["id"])

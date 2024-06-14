@@ -46,7 +46,8 @@ class UserUseCase:
             f'''
                 UPDATE user
                 SET name="{user.name}",
-                email="{user.email}"
+                email="{user.email}",
+                is_seller={user.is_seller}
                 WHERE id={user_id}
             '''
         )
