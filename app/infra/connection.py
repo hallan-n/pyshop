@@ -1,7 +1,7 @@
 from infra.schemas import metadata
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-
+from os import getenv
 
 class Connection:
     _instance = None
@@ -15,7 +15,7 @@ class Connection:
     def __init__(self) -> None:
         if self._initialized:
             return
-        self.url = "mysql+aiomysql://root:123456@localhost:3306/pyshop"
+        self.url = f"{getenv('DB_CONNECTOR')}://{getenv('DB_USER')}:{getenv('DB_PASSWORD')}@{getenv('DB_HOST')}:{getenv('DB_PORT')}/{getenv('DB_DATABASE')}"
         self.engine = create_async_engine(
             self.url, echo=True, pool_size=10, max_overflow=20
         )
